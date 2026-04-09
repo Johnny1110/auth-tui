@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,7 +26,15 @@ const (
 	StateRenaming
 )
 
-const configFile = "authc-config.json"
+const configFile = ".authc-config.json"
+
+func getConfigPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return configFile
+	}
+	return filepath.Join(home, configFile)
+}
 
 // Account define 2FA Account
 type Account struct {
@@ -105,7 +114,8 @@ func saveConfig(filename string, accounts []Account) error {
 }
 
 func initialModel() model {
-	accounts, err := loadConfig(configFile)
+	path := getConfigPath() //  ~/.authc-config.json
+	accounts, err := loadConfig(path)
 
 	ti := textinput.New()
 	ti.CharLimit = 156
@@ -284,7 +294,7 @@ func (m *model) copyCurrentCode() {
 }
 
 func (m *model) saveAndRefresh(successMsg string) {
-	err := saveConfig(configFile, m.accounts)
+	err := saveConfig(getConfigPath(), m.accounts)
 	if err != nil {
 		m.message = fmt.Sprintf("Failed to save config: %v", err)
 	} else {
