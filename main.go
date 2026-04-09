@@ -393,7 +393,7 @@ func (m model) viewInput() string {
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("exec err: %v", err)
 		os.Exit(1)
