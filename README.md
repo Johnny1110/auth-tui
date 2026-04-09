@@ -11,6 +11,28 @@
 `authc` is a lightweight, terminal-based Two-Factor Authentication (2FA) manager.
 It generates TOTP codes based on your saved secrets and stores them locally in a JSON configuration file.
 
+<br>
+
+### Demo TUI
+
+
+```
+========================== ( -_^)   <authc>  [Update countdown: 28s] ========================== 
+                                                                                                
+                                                                                                
+    STG:johnny                                        ------------------>  [ 327916 ]
+
+    TESTNET:johnny                                    ------------------>  [ 398340 ]
+
+  > PROD:johnny2                                      ------------------>  [ 624009 ]
+
+                                                          
+  Copied code [106085] for STG:johnny2 to clipboard!
+                                                                                    
+                                                                                    
+↑/k: Up • ↓/j: Down • K/J: Move • c: Copy • n: New • d: Delete • r: Rename • q: Quit
+```
+
 ---
 
 ## Installation & Setup
@@ -120,3 +142,6 @@ authc
 * Secret Format: When adding a new account, the secret should be the Base32 string provided by the service (e.g., Google, GitHub). Spaces are automatically removed.
 * Security: Since the secret keys are stored in your home directory in plain text, ensure your machine uses disk encryption (like FileVault or BitLocker) and that you keep your laptop locked.
 * Syncing: You can backup or sync your ~/.authc-config.json across machines to keep your 2FA codes consistent.
+
+<br>
+<br>
