@@ -56,6 +56,9 @@ type model struct {
 	// Input handling for creating and renaming
 	textInput textinput.Model
 	tempName  string // Temporarily store name while waiting for secret
+
+	petFrame int
+	petMood  string // "idle", "happy", "sad"
 }
 
 // UI styles
@@ -68,6 +71,13 @@ var (
 	errorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("196")).PaddingLeft(2).MarginTop(1)
 	helpStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).MarginTop(1)
 	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("99")).Bold(true).PaddingLeft(2)
+)
+
+// Pets Mood
+var (
+	petIdle  = []string{"( ^_^) ", "( ^_-) ", "( -_^) "}
+	petHappy = []string{"(^▽^ )/", "(^O^ )/", "(^u^ )/"}
+	petSad   = []string{"( T_T) ", "( >_<) ", "( X_X) "}
 )
 
 // tickMsg update per sec.
@@ -141,6 +151,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Handle global tick events regardless of state
 	if t, ok := msg.(tickMsg); ok {
 		m.now = time.Time(t)
+
+		// Cycle pet frames every second
+		m.petFrame = (m.petFrame + 1) % 3
+		// Return to idle after a few seconds of being happy/sad
+		if m.now.Second()%5 == 0 {
+			m.petMood = "idle"
+		}
+
 		return m, tick()
 	}
 
@@ -302,6 +320,7 @@ func (m *model) copyCurrentCode() {
 	if err == nil {
 		clipboard.WriteAll(code)
 		m.message = fmt.Sprintf("Copied code [%s] for %s to clipboard!", code, acc.Name)
+		m.petMood = "happy" // Pet celebrates your successful copy!
 	} else {
 		m.message = "Copy failed!"
 	}
@@ -321,6 +340,7 @@ func (m *model) saveAndRefresh(successMsg string) {
 func (m *model) cancelAction() {
 	m.state = StateList
 	m.message = "Action canceled."
+	m.petMood = "sad" // Pet is sad you canceled.
 	m.textInput.Blur()
 }
 
@@ -333,9 +353,19 @@ func (m model) View() string {
 
 	var b strings.Builder
 
+	var petSprite string
+	switch m.petMood {
+	case "happy":
+		petSprite = petHappy[m.petFrame]
+	case "sad":
+		petSprite = petSad[m.petFrame]
+	default:
+		petSprite = petIdle[m.petFrame]
+	}
+
 	// Render Header
 	remainingSeconds := 30 - (m.now.Second() % 30)
-	header := fmt.Sprintf("==========================  <authc>  [Update countdown: %02ds] ========================== \n", remainingSeconds)
+	header := fmt.Sprintf("========================== %s  <authc>  [Update countdown: %02ds] ========================== \n", petSprite, remainingSeconds)
 	b.WriteString(titleStyle.Render(header))
 	b.WriteString("\n")
 
