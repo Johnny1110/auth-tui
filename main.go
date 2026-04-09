@@ -175,6 +175,20 @@ func (m model) updateList(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor < len(m.accounts)-1 {
 				m.cursor++
 			}
+		case "K": // Move Up
+			if m.cursor > 0 {
+				// Swap with previous
+				m.accounts[m.cursor], m.accounts[m.cursor-1] = m.accounts[m.cursor-1], m.accounts[m.cursor]
+				m.cursor--
+				m.saveAndRefresh(fmt.Sprintf("Moved %s up", m.accounts[m.cursor].Name))
+			}
+		case "J": // Move Down
+			if m.cursor < len(m.accounts)-1 {
+				// Swap with next
+				m.accounts[m.cursor], m.accounts[m.cursor+1] = m.accounts[m.cursor+1], m.accounts[m.cursor]
+				m.cursor++
+				m.saveAndRefresh(fmt.Sprintf("Moved %s down", m.accounts[m.cursor].Name))
+			}
 		case "c", "C":
 			m.copyCurrentCode()
 		case "d", "D":
@@ -321,7 +335,7 @@ func (m model) View() string {
 
 	// Render Header
 	remainingSeconds := 30 - (m.now.Second() % 30)
-	header := fmt.Sprintf("==========================  <Authenticator>  [Update countdown: %02ds] ========================== \n", remainingSeconds)
+	header := fmt.Sprintf("==========================  <authc>  [Update countdown: %02ds] ========================== \n", remainingSeconds)
 	b.WriteString(titleStyle.Render(header))
 	b.WriteString("\n")
 
@@ -342,7 +356,7 @@ func (m model) View() string {
 	}
 
 	// Render Help Bar
-	helpTxt := "↑/k: Up • ↓/j: Down • c: Copy • n: New • d: Delete • r: Rename • q: Quit"
+	helpTxt := "↑/k: Up • ↓/j: Down • K/J: Move • c: Copy • n: New • d: Delete • r: Rename • q: Quit"
 	if m.state != StateList {
 		helpTxt = "enter: Confirm • esc: Cancel • ctrl+c: Quit"
 	}
@@ -370,15 +384,15 @@ func (m model) viewList() string {
 			lineStyle = selected
 		}
 
-		leftPart := fmt.Sprintf("%s%-25s ---> ", cursorStr, acc.Name)
+		leftPart := fmt.Sprintf("%s%-50s ------------------> ", cursorStr, acc.Name)
 		styledLeft := lineStyle.Render(leftPart)
-		row := fmt.Sprintf("%s [%s]", styledLeft, codeStyle.Render(code))
+		row := fmt.Sprintf("%s [ %s ]", styledLeft, codeStyle.Render(code))
 
 		// Highlight row differently if pending deletion
 		if m.state == StateDeleting && m.cursor == i {
 			b.WriteString(errorStyle.Render(fmt.Sprintf("%s  <-- [Delete this? (y/n)]", row)) + "\n")
 		} else {
-			b.WriteString(row + "\n")
+			b.WriteString(row + "\n\n")
 		}
 	}
 	return b.String()
