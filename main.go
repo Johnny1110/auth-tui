@@ -414,7 +414,7 @@ func (m model) viewList() string {
 			lineStyle = selected
 		}
 
-		leftPart := fmt.Sprintf("%s%-50s ------------------> ", cursorStr, acc.Name)
+		leftPart := fmt.Sprintf("%s%-55s ------------------> ", cursorStr, acc.Name)
 		styledLeft := lineStyle.Render(leftPart)
 		row := fmt.Sprintf("%s [ %s ]", styledLeft, codeStyle.Render(code))
 
